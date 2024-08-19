@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary App</title>
+    <style>
+        body {
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fafac6;
+            margin: 0;
+        }
+
+        .dictionary-container {
+            background-color: #79e5f8;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #26f60b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .definition-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .definition-container h3 {
+            margin: 10px 0;
+        }
+
+        .definition-container p {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dictionary-container">
+    <h2>Dictionary App</h2>
+    <input type="text" id="word-input" placeholder="Enter a word">
+    <button id="search-button">Search</button>
+
+    <div class="definition-container" id="definition-container">
+        <!-- Word definitions will be displayed here -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const searchButton = document.getElementById('search-button');
+    const wordInput = document.getElementById('word-input');
+    const definitionContainer = document.getElementById('definition-container');
+
+    searchButton.addEventListener('click', () => {
+        const word = wordInput.value.trim();
+        if (word !== '') {
+            fetchDefinition(word);
+        } else {
+            alert('Please enter a word.');
+        }
+    });
+
+    function fetchDefinition(word) {
+        const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.title === "No Definitions Found") {
+                    definitionContainer.innerHTML = `<p>No definitions found for "${word}". Please try another word.</p>`;
+                } else {
+                    displayDefinition(data[0]);
+                }
+            })
+            .catch(error => {
+                definitionContainer.innerHTML = `<p>Error fetching data. Please try again later.</p>`;
+            });
+    }
+
+    function displayDefinition(data) {
+        const { word, meanings } = data;
+        let definitionsHtml = `<h3>${word}</h3>`;
+
+        meanings.forEach((meaning, index) => {
+            definitionsHtml += `<p><strong>${index + 1}. (${meaning.partOfSpeech})</strong> ${meaning.definitions[0].definition}</p>`;
+            if (meaning.definitions[0].example) {
+                definitionsHtml += `<p><em>Example: ${meaning.definitions[0].example}</em></p>`;
+            }
+        });
+
+        definitionContainer.innerHTML = definitionsHtml;
+    }
+});
+
+</script>
+</body>
+</html>
